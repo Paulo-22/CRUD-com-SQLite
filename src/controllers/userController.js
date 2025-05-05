@@ -80,3 +80,18 @@ export const deleteUser = async (req, res) => {
         })
     }
 }
+export const getUserId = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const users = await prisma.user.findUnique({ 
+            where:  { id: parseInt(id)}
+        })
+            res.status(200).json(user);
+    } catch (erro) {
+        req.status(500).json({
+            mensagem: "Error ao procurar o usuario não encontrado!",
+            erro: erro.mensagem,
+        })
+    }
+
+};
