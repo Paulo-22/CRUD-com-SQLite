@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 
+import { generateToken, hashPassword } from '../utils/auth.js'
+
 const prisma = new PrismaClient()
 
 export const getAllUsers = async (req, res)=>{
@@ -86,7 +88,7 @@ export const getUserId = async (req, res) => {
         const users = await prisma.user.findUnique({ 
             where:  { id: parseInt(id)}
         })
-            res.status(200).json(user);
+            res.status(200).json(users);
     } catch (erro) {
         req.status(500).json({
             mensagem: "Error ao procurar o usuario não encontrado!",
@@ -95,3 +97,30 @@ export const getUserId = async (req, res) => {
     }
 
 };
+export const registerUser = async (req, res) => {
+    const {name, email, password} = req.body
+
+    try{
+        //criar a senha do Usuario hasheada
+        const hashedPassword = await hashPassword(password)
+        const newRegisteredUser = await prisma.user.create({
+            data: {
+                name: name,
+                email: email,
+                password: hashedPassword
+            }
+        });
+        //Gerar um token JWT
+        const token = generateToken(newRegisteredUser)
+        res.status(201).json({
+            name: newRegisteredUser.name,
+            email: newRegisteredUser.email,
+            token: token
+        })
+    }catch(error){
+        res.status(400).json({
+            erro:"Erro ao registrar o  usuario",
+            detalhes: error.message
+        })
+    }
+}
