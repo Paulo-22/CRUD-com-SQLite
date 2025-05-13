@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt"
+import "dotenv/config"
 
 import jwt from "jsonwebtoken"
 
@@ -18,4 +19,11 @@ export function generateToken(user) {
 
         {expiresIn: '1h'}
     )
+}
+export async function comparePassword(password, hashedPassword) {
+  return await bcrypt.compare(password, hashedPassword);
+}
+
+export function verifyToken(token) {
+  return jwt.verify(token, JWT_SECRET);
 }
